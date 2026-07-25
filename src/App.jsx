@@ -3,9 +3,9 @@ import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
-import Catalogo from './pages/Catalogo'
 import Inventario from './pages/Inventario'
 import Ventas from './pages/Ventas'
+import Devoluciones from './pages/Devoluciones'
 
 function App() {
   return (
@@ -22,8 +22,8 @@ function App() {
             }
           >
             <Route path="/ventas" element={<Ventas />} />
-            <Route path="/catalogo" element={<Catalogo />} />
             <Route path="/inventario" element={<Inventario />} />
+            <Route path="/devoluciones" element={<Devoluciones />} />
             <Route path="/" element={<Navigate to="/ventas" replace />} />
           </Route>
 

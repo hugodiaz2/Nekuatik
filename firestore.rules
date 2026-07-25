@@ -11,5 +11,9 @@ service cloud.firestore {
       allow read, create: if request.auth != null;
       allow update, delete: if false; // las ventas no se editan ni se borran
     }
+    match /devoluciones/{devolucionId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if false;
+    }
   }
 }

@@ -7,10 +7,10 @@ y **Firebase** (Authentication + Firestore).
 ## Funcionalidades
 
 - **Inicio de sesión**: acceso restringido por cuenta de empleado (Firebase Authentication).
-- **Catálogo de productos**: vista de todos los productos con precio y existencias, en tiempo real.
-- **Inventario**: alta, edición y baja de productos; registro de entradas por compra; alerta visual de stock bajo.
-- **Punto de venta**: carrito de compra, selección de forma de pago (efectivo, tarjeta, transferencia) y descuento automático de stock al cobrar (vía transacción atómica, evita vender de más si dos personas cobran al mismo tiempo).
-- **Operación autónoma**: Firestore mantiene una caché local persistente, así que el catálogo y el registro de ventas siguen funcionando aunque se corte el internet un momento; al reconectar, sincroniza los cambios.
+- **Home / Punto de venta**: búsqueda o lectura de código de barras, ticket con cantidad y subtotal por producto, contador de ventas y acumulado del día, historial de ventas, y cobro por **Efectivo** (con cálculo de cambio) o **Tarjeta** (débito/crédito).
+- **Inventario**: catálogo filtrable por categoría, alta de producto (código de barras, presentación en caja o individual, contenido, caducidad), registro de entradas por compra, edición rápida y alerta visual de stock bajo.
+- **Devoluciones**: selecciona una venta reciente y devuelve productos; el stock se reintegra automáticamente al inventario.
+- **Operación autónoma**: Firestore mantiene una caché local persistente, así que el sistema sigue funcionando aunque se corte el internet un momento; al reconectar, sincroniza los cambios.
 
 ## Requisitos previos
 
@@ -64,14 +64,14 @@ Esto genera la carpeta `dist/`, lista para publicarse (por ejemplo con `firebase
 
 ```
 src/
-  components/    Navbar, Layout, ProtectedRoute (rutas privadas)
+  components/    Sidebar, Header, Layout, ProtectedRoute (rutas privadas)
   context/       AuthContext (sesión del usuario)
   firebase/      Configuración e inicialización de Firebase
   pages/
-    Login.jsx        Inicio de sesión
-    Catalogo.jsx      Catálogo de productos (solo lectura)
-    Inventario.jsx    Alta/edición/baja de productos y registro de compras
-    Ventas.jsx        Punto de venta (carrito, cobro, formas de pago)
+    Login.jsx          Inicio de sesión
+    Ventas.jsx          Home / Punto de venta (ticket, cobro, historial)
+    Inventario.jsx      Categorías, tabla de productos y modales (Nuevo/Agregar/Editar/Caducidad)
+    Devoluciones.jsx    Devolución de productos de ventas recientes
 ```
 
 ## Modelo de datos en Firestore
@@ -79,25 +79,43 @@ src/
 **Colección `productos`**
 | Campo | Tipo | Descripción |
 |---|---|---|
-| nombre | string | Nombre del producto |
-| categoria | string | Categoría (dulces, chocolates, etc.) |
+| nombre | string | Nombre del dulce |
+| codigoBarras | string | Código de barras (leído o escrito) |
+| categoria | string | Una de las categorías predefinidas (Dulces de Leche, Guayaba, Coco, Tamarindo, Obleas y mazapanes, Extras, Licores, Arreglos, A Granel) |
+| presentacion | string | `caja` \| `individual` — cómo llega la mercancía |
+| empaque | string | `paquete` \| `piezas` |
+| numPaquetePiezas | number | Piezas por caja/paquete |
+| contenido | string | Contenido/peso por unidad (ej. "500g") |
 | precio | number | Precio de venta |
-| costo | number | Costo de compra |
-| stock | number | Existencias actuales |
+| stock | number | Existencias actuales (en unidades de venta) |
 | stockMinimo | number | Umbral para alertar stock bajo |
+| fechaCompra | string (fecha) | Última fecha de compra registrada |
+| caducidad | string (fecha) | Fecha de caducidad del lote más reciente |
 
 **Colección `ventas`**
 | Campo | Tipo | Descripción |
 |---|---|---|
-| items | array | Productos vendidos (id, nombre, cantidad, precio unitario) |
+| items | array | Productos vendidos (id, nombre, contenido, cantidad, precio unitario) |
 | total | number | Total cobrado |
-| metodoPago | string | `efectivo` \| `tarjeta` \| `transferencia` |
+| metodoPago | string | `efectivo` \| `tarjeta` |
+| montoRecibido / cambio | number | Solo si `metodoPago` es efectivo |
+| tipoTarjeta | string | `debito` \| `credito`, solo si `metodoPago` es tarjeta |
 | vendedorEmail | string | Empleado que hizo la venta |
+| fecha | timestamp | Fecha/hora del servidor |
+
+**Colección `devoluciones`**
+| Campo | Tipo | Descripción |
+|---|---|---|
+| ventaId | string | Referencia a la venta original |
+| productoId | string | Producto devuelto |
+| nombre | string | Nombre del producto al momento de la devolución |
+| cantidad | number | Unidades devueltas |
+| vendedorEmail | string | Quién registró la devolución |
 | fecha | timestamp | Fecha/hora del servidor |
 
 ## Próximos pasos sugeridos
 
 - Reportes de ventas por día/semana/mes y por método de pago.
-- Historial de movimientos de inventario (auditoría de compras).
+- Historial de lotes/caducidades por producto (actualmente solo se guarda el más reciente).
 - Roles de usuario (administrador vs. cajero) usando Firestore o Custom Claims.
 - Impresión/generación de tickets de venta.
