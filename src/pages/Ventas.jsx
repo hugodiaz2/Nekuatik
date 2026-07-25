@@ -79,11 +79,15 @@ export default function Ventas() {
     if (!busqueda.trim()) return []
     const texto = busqueda.toLowerCase()
     return productos
-      .filter(
-        (p) =>
-          p.nombre?.toLowerCase().includes(texto) ||
-          p.codigoBarras?.toLowerCase() === texto,
-      )
+      .filter((p) => {
+        const coincideCodigo = p.codigoBarras?.toLowerCase() === texto
+        if (esGranel(p)) {
+          // A Granel: se busca por nombre o por el código interno asignado.
+          return coincideCodigo || p.nombre?.toLowerCase().includes(texto)
+        }
+        // Individual: solo se encuentra con el código exacto (escáner o escrito).
+        return coincideCodigo
+      })
       .slice(0, 6)
   }, [busqueda, productos])
 
@@ -239,8 +243,12 @@ export default function Ventas() {
           )}
           {noHayCoincidencias && (
             <div className="absolute z-10 mt-1 w-full rounded-md bg-white p-3 shadow-lg">
-              <p className="mb-2 text-sm text-gray-500">
+              <p className="mb-1 text-sm text-gray-500">
                 No se encontró "{busqueda}" en el inventario.
+              </p>
+              <p className="mb-2 text-xs text-gray-400">
+                Recuerda: los productos individuales solo se encuentran escaneando o escribiendo
+                su código de barras exacto (no por nombre).
               </p>
               <button
                 onClick={() => setMostrarAltaRapida(true)}
