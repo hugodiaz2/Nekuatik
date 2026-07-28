@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   addDoc,
   collection,
@@ -13,7 +14,15 @@ import {
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
-import { CATEGORIAS, CATEGORIA_GRANEL, esGranel, precioPorUnidadVendida } from '../constants'
+import {
+  CATEGORIAS,
+  CATEGORIA_GRANEL,
+  esGranel,
+  folioVenta,
+  precioPorUnidadVendida,
+  ventaCoincideBusqueda,
+} from '../constants'
+import { registrarDevolucion } from '../firebase/devoluciones'
 
 function esMismoDia(fechaTimestamp) {
   if (!fechaTimestamp?.toDate) return false
@@ -28,6 +37,7 @@ function esMismoDia(fechaTimestamp) {
 
 export default function Ventas() {
   const { usuario } = useAuth()
+  const navigate = useNavigate()
   const [productos, setProductos] = useState([])
   const [ventasRecientes, setVentasRecientes] = useState([])
   const [devolucionesRecientes, setDevolucionesRecientes] = useState([])
@@ -35,6 +45,7 @@ export default function Ventas() {
   const [carrito, setCarrito] = useState([])
   const [modalPago, setModalPago] = useState(null) // 'efectivo' | 'tarjeta' | null
   const [mostrarHistorial, setMostrarHistorial] = useState(false)
+  const [mostrarDevolucion, setMostrarDevolucion] = useState(false)
   const [mostrarAltaRapida, setMostrarAltaRapida] = useState(false)
   const [mensaje, setMensaje] = useState('')
   const [procesando, setProcesando] = useState(false)
@@ -148,18 +159,35 @@ export default function Ventas() {
     setMensaje('')
     try {
       await runTransaction(db, async (transaction) => {
-        for (const item of carrito) {
-          const ref = doc(db, 'productos', item.id)
-          const snap = await transaction.get(ref)
-          const stockActual = snap.data()?.stock ?? 0
+        // Todas las lecturas primero (stock de cada producto + contador de
+        // folios), y hasta el final las escrituras: Firestore no garantiza
+        // el resultado de una transacción que intercala lecturas y escrituras.
+        const productoRefs = carrito.map((item) => doc(db, 'productos', item.id))
+        const productoSnaps = []
+        for (const ref of productoRefs) {
+          productoSnaps.push(await transaction.get(ref))
+        }
+        const contadorRef = doc(db, 'contadores', 'ventas')
+        const contadorSnap = await transaction.get(contadorRef)
+
+        carrito.forEach((item, i) => {
+          const stockActual = productoSnaps[i].data()?.stock ?? 0
           if (stockActual < item.cantidad) {
             throw new Error(`Stock insuficiente de "${item.nombre}"`)
           }
-          transaction.update(ref, { stock: stockActual - item.cantidad })
-        }
+        })
+
+        const folio = (contadorSnap.data()?.ultimo ?? 0) + 1
+
+        carrito.forEach((item, i) => {
+          const stockActual = productoSnaps[i].data()?.stock ?? 0
+          transaction.update(productoRefs[i], { stock: stockActual - item.cantidad })
+        })
+        transaction.set(contadorRef, { ultimo: folio }, { merge: true })
 
         const ventaRef = doc(collection(db, 'ventas'))
         transaction.set(ventaRef, {
+          folio,
           items: carrito.map((item) => ({
             productoId: item.id,
             nombre: item.nombre,
@@ -209,6 +237,12 @@ export default function Ventas() {
           className="rounded-md bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-300"
         >
           historial
+        </button>
+        <button
+          onClick={() => setMostrarDevolucion(true)}
+          className="rounded-md bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-300"
+        >
+          ↩️ Hacer Devolución
         </button>
       </Header>
 
@@ -357,6 +391,14 @@ export default function Ventas() {
         <HistorialModal ventas={ventasRecientes} onClose={() => setMostrarHistorial(false)} />
       )}
 
+      {mostrarDevolucion && (
+        <DevolucionRapidaModal
+          ventas={ventasRecientes}
+          usuario={usuario}
+          onClose={() => setMostrarDevolucion(false)}
+        />
+      )}
+
       {mostrarAltaRapida && (
         <AltaRapidaModal
           textoInicial={busqueda}
@@ -489,6 +531,7 @@ function HistorialModal({ ventas, onClose }) {
           <table className="min-w-full text-sm">
             <thead className="sticky top-0 bg-gray-100 text-left text-gray-600">
               <tr>
+                <th className="px-4 py-2">Folio</th>
                 <th className="px-4 py-2">Fecha</th>
                 <th className="px-4 py-2">Vendedor</th>
                 <th className="px-4 py-2">Pago</th>
@@ -498,6 +541,7 @@ function HistorialModal({ ventas, onClose }) {
             <tbody>
               {ventas.map((v) => (
                 <tr key={v.id} className="border-t">
+                  <td className="px-4 py-2 font-mono text-xs text-gray-500">{folioVenta(v)}</td>
                   <td className="px-4 py-2">
                     {v.fecha?.toDate ? v.fecha.toDate().toLocaleString() : '—'}
                   </td>
@@ -508,7 +552,7 @@ function HistorialModal({ ventas, onClose }) {
               ))}
               {ventas.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
+                  <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
                     Aún no hay ventas registradas.
                   </td>
                 </tr>
@@ -516,6 +560,326 @@ function HistorialModal({ ventas, onClose }) {
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// "Procesar Devolución": dos columnas — izquierda buscador (por dulce o
+// folio) + lista de ventas recientes; derecha la venta elegida, el dulce a
+// devolver (una venta puede tener varios), cantidad, motivo y confirmación.
+// El producto_id guardado en cada línea de la venta es lo que permite
+// regresar la pieza exacta a su fila del inventario.
+function DevolucionRapidaModal({ ventas, usuario, onClose }) {
+  const [busqueda, setBusqueda] = useState('')
+  const [ventaSeleccionada, setVentaSeleccionada] = useState(null)
+  const [itemIdx, setItemIdx] = useState(0)
+  const [cantidad, setCantidad] = useState(0)
+  const [motivo, setMotivo] = useState('cambio')
+  const [monto, setMonto] = useState('0.00')
+  const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState('')
+  const [exito, setExito] = useState('')
+
+  const listaVentas = useMemo(() => {
+    const texto = busqueda.trim()
+    const base = texto
+      ? ventas.filter((v) => ventaCoincideBusqueda(v, texto))
+      : ventas.filter((v) => esMismoDia(v.fecha))
+    return base.slice(0, 20)
+  }, [busqueda, ventas])
+
+  const item = ventaSeleccionada?.items?.[itemIdx] ?? null
+
+  const fijarItem = (venta, idx) => {
+    const it = venta.items?.[idx]
+    setItemIdx(idx)
+    setCantidad(it?.cantidad ?? 0)
+    setMonto(((it?.cantidad ?? 0) * (it?.precioUnitario || 0)).toFixed(2))
+  }
+
+  const seleccionarVenta = (venta) => {
+    setVentaSeleccionada(venta)
+    const texto = busqueda.trim().toLowerCase()
+    const idx = texto
+      ? Math.max(
+          0,
+          (venta.items || []).findIndex((it) => it.nombre?.toLowerCase().includes(texto)),
+        )
+      : 0
+    fijarItem(venta, idx)
+  }
+
+  const actualizarCantidad = (valor) => {
+    const c = Math.max(0, Math.min(item.cantidad, Number(valor) || 0))
+    setCantidad(c)
+    setMonto((c * (item.precioUnitario || 0)).toFixed(2))
+  }
+
+  const volver = () => {
+    setVentaSeleccionada(null)
+    setItemIdx(0)
+  }
+
+  const handleConfirmar = async () => {
+    if (!item || cantidad <= 0) return
+    setGuardando(true)
+    setError('')
+    try {
+      await registrarDevolucion(db, {
+        usuario,
+        venta: ventaSeleccionada,
+        item,
+        cantidad,
+        motivo,
+        monto: Number(monto) || 0,
+      })
+      setExito(
+        motivo === 'perdida'
+          ? `Se registró "${item.nombre}" como mercancía perdida (merma). Se descontaron $${Number(monto).toFixed(2)} de caja.`
+          : `Devolución registrada: "${item.nombre}" reingresó al inventario y se descontaron $${Number(monto).toFixed(2)} de caja.`,
+      )
+    } catch (err) {
+      setError(err.message || 'No se pudo registrar la devolución.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50 p-4">
+      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg bg-white">
+        <div className="flex items-center justify-between bg-neutral-900 px-6 py-4 text-white">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">↩️</span>
+            <h2 className="text-lg font-semibold">Procesar Devolución</h2>
+          </div>
+          <button onClick={onClose} className="text-sm text-gray-300 hover:text-white">
+            cerrar ×
+          </button>
+        </div>
+
+        {exito ? (
+          <div className="p-6">
+            <p className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-700">{exito}</p>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={onClose}
+                className="rounded-md bg-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-1 flex-col overflow-hidden sm:flex-row">
+            <div className="flex w-full flex-col border-b p-5 sm:w-2/5 sm:border-b-0 sm:border-r">
+              <label className="mb-1 text-sm font-medium text-gray-700">
+                Buscar por Producto o Folio
+              </label>
+              <input
+                type="text"
+                autoFocus
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Ej. Jamoncillo o FOL-102..."
+                className="mb-3 w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+              />
+              <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
+                {busqueda.trim() ? 'Resultados' : 'Ventas recientes (hoy)'}
+              </p>
+              <div className="flex-1 space-y-2 overflow-y-auto">
+                {listaVentas.map((v) => {
+                  const seleccionada = ventaSeleccionada?.id === v.id
+                  return (
+                    <button
+                      key={v.id}
+                      onClick={() => seleccionarVenta(v)}
+                      className={`w-full rounded-md border px-3 py-2 text-left text-sm transition ${
+                        seleccionada ? 'border-orange-500 bg-orange-50' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-semibold text-gray-800">
+                          {folioVenta(v)}
+                        </span>
+                        <span className="font-semibold text-gray-800">
+                          ${Number(v.total || 0).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="mt-0.5 flex items-center justify-between text-xs text-gray-500">
+                        <span>
+                          {v.fecha?.toDate
+                            ? v.fecha.toDate().toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })
+                            : '—'}{' '}
+                          · <span className="capitalize">{v.metodoPago}</span>
+                        </span>
+                        <span className="text-orange-600">Ver productos →</span>
+                      </div>
+                    </button>
+                  )
+                })}
+                {listaVentas.length === 0 && (
+                  <p className="text-sm text-gray-400">
+                    {busqueda.trim()
+                      ? `Sin resultados para "${busqueda}".`
+                      : 'No hay ventas registradas hoy todavía.'}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex w-full flex-col overflow-y-auto p-5 sm:w-3/5">
+              {!ventaSeleccionada ? (
+                <p className="m-auto max-w-xs text-center text-sm text-gray-400">
+                  Elige una venta de la lista para ver sus productos.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-md border border-orange-200 bg-orange-50 px-4 py-3 text-sm">
+                    <span className="text-gray-600">Venta Seleccionada: </span>
+                    <span className="font-mono font-semibold text-gray-800">
+                      {folioVenta(ventaSeleccionada)}
+                    </span>
+                    <span className="float-right text-gray-600">
+                      Total Original:{' '}
+                      <span className="font-semibold text-gray-800">
+                        ${Number(ventaSeleccionada.total || 0).toFixed(2)}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                      Selecciona el Dulce a Devolver
+                    </label>
+                    <select
+                      value={itemIdx}
+                      onChange={(e) => fijarItem(ventaSeleccionada, Number(e.target.value))}
+                      className="w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                    >
+                      {(ventaSeleccionada.items || []).map((it, idx) => (
+                        <option key={idx} value={idx}>
+                          {it.nombre} (ID: {it.productoId?.slice(-6).toUpperCase()}) — $
+                          {Number(it.precioUnitario || 0).toFixed(2)} c/u
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {item && (
+                    <>
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                          Cantidad a Devolver {item.unidad === 'g' ? '(g)' : ''}
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="number"
+                            min="0"
+                            max={item.cantidad}
+                            value={cantidad}
+                            onChange={(e) => actualizarCantidad(e.target.value)}
+                            className="w-32 rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                          />
+                          <span className="text-sm text-gray-400">
+                            Máx: {item.cantidad} {item.unidad === 'g' ? 'g' : ''}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="mb-2 text-sm font-medium text-gray-700">
+                          Motivo de la devolución
+                        </p>
+                        <div className="space-y-2">
+                          <label className="flex items-center gap-2 rounded-md border p-3 text-sm has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                            <input
+                              type="radio"
+                              name="motivo-rapido"
+                              checked={motivo === 'cambio'}
+                              onChange={() => setMotivo('cambio')}
+                            />
+                            <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-green-500" />
+                            <span>
+                              <span className="font-medium">Cliente se arrepintió:</span>{' '}
+                              <span className="text-gray-600">Producto intacto.</span>{' '}
+                              <span className="text-xs italic text-gray-400">
+                                (Regresa a stock en BD)
+                              </span>
+                            </span>
+                          </label>
+                          <label className="flex items-center gap-2 rounded-md border p-3 text-sm has-[:checked]:border-red-500 has-[:checked]:bg-red-50">
+                            <input
+                              type="radio"
+                              name="motivo-rapido"
+                              checked={motivo === 'perdida'}
+                              onChange={() => setMotivo('perdida')}
+                            />
+                            <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-red-500" />
+                            <span>
+                              <span className="font-medium">Producto dañado / Merma:</span>{' '}
+                              <span className="text-gray-600">Empaque roto/caducado.</span>{' '}
+                              <span className="text-xs italic text-gray-400">
+                                (NO regresa a stock)
+                              </span>
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                          Monto a reembolsar
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={monto}
+                          onChange={(e) => setMonto(e.target.value)}
+                          className="w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                        />
+                        <p className="mt-1 text-xs text-gray-400">
+                          Se calcula automático; ajústalo si el reembolso es parcial.
+                        </p>
+                      </div>
+
+                      {error && (
+                        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+                          {error}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {!exito && ventaSeleccionada && (
+          <div className="flex justify-end gap-3 border-t px-6 py-4">
+            <button
+              onClick={volver}
+              className="rounded-md border border-gray-300 bg-white px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              Volver
+            </button>
+            {item && (
+              <button
+                onClick={handleConfirmar}
+                disabled={guardando || cantidad <= 0}
+                className="rounded-md bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+              >
+                {guardando ? 'Guardando...' : `Guardar ($${(Number(monto) || 0).toFixed(2)})`}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

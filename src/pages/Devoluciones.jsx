@@ -1,28 +1,22 @@
-import { useEffect, useState } from 'react'
-import {
-  collection,
-  doc,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  runTransaction,
-  serverTimestamp,
-} from 'firebase/firestore'
+import { useEffect, useMemo, useState } from 'react'
+import { collection, limit, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { db } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
 import Header from '../components/Header'
+import { registrarDevolucion as registrarDevolucionEnFirestore } from '../firebase/devoluciones'
+import { folioVenta, ventaCoincideBusqueda } from '../constants'
 
 export default function Devoluciones() {
   const { usuario } = useAuth()
   const [ventas, setVentas] = useState([])
   const [devoluciones, setDevoluciones] = useState([])
+  const [busqueda, setBusqueda] = useState('')
   const [ventaAbierta, setVentaAbierta] = useState(null)
   const [itemADevolver, setItemADevolver] = useState(null) // { venta, item }
   const [mensaje, setMensaje] = useState('')
 
   useEffect(() => {
-    const q = query(collection(db, 'ventas'), orderBy('fecha', 'desc'), limit(30))
+    const q = query(collection(db, 'ventas'), orderBy('fecha', 'desc'), limit(100))
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setVentas(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })))
     })
@@ -37,33 +31,18 @@ export default function Devoluciones() {
     return unsubscribe
   }, [])
 
+  // Búsqueda rápida por nombre del dulce o por folio: los clientes casi
+  // nunca traen ticket, así que se busca por lo que sí recuerdan.
+  const ventasFiltradas = useMemo(() => {
+    const texto = busqueda.trim()
+    if (!texto) return ventas
+    return ventas.filter((v) => ventaCoincideBusqueda(v, texto))
+  }, [busqueda, ventas])
+
   const registrarDevolucion = async ({ venta, item, cantidad, motivo, monto }) => {
     setMensaje('')
     try {
-      await runTransaction(db, async (transaction) => {
-        const productoRef = doc(db, 'productos', item.productoId)
-        const snap = await transaction.get(productoRef)
-        const esPerdida = motivo === 'perdida'
-
-        // Solo se reintegra al stock si el producto sigue siendo vendible.
-        if (!esPerdida && snap.exists()) {
-          const stockActual = snap.data().stock ?? 0
-          transaction.update(productoRef, { stock: stockActual + cantidad })
-        }
-
-        const devolucionRef = doc(collection(db, 'devoluciones'))
-        transaction.set(devolucionRef, {
-          ventaId: venta.id,
-          productoId: item.productoId,
-          nombre: item.nombre,
-          cantidad,
-          motivo,
-          mercanciaPerdida: esPerdida,
-          monto,
-          vendedorEmail: usuario?.email ?? null,
-          fecha: serverTimestamp(),
-        })
-      })
+      await registrarDevolucionEnFirestore(db, { usuario, venta, item, cantidad, motivo, monto })
       setMensaje(
         motivo === 'perdida'
           ? `Se registró "${item.nombre}" como mercancía perdida y se descontó $${monto.toFixed(2)} del acumulado.`
@@ -90,8 +69,16 @@ export default function Devoluciones() {
 
         {mensaje && <p className="mb-4 text-sm text-gray-700">{mensaje}</p>}
 
+        <input
+          type="text"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          placeholder="Buscar por Producto o Folio (ej. Jamoncillo o FOL-102)..."
+          className="mb-4 w-full max-w-md rounded-md bg-gray-100 px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-neutral-800"
+        />
+
         <div className="mb-8 space-y-2">
-          {ventas.map((v) => {
+          {ventasFiltradas.map((v) => {
             const abierta = ventaAbierta === v.id
             return (
               <div key={v.id} className="rounded-lg bg-white shadow">
@@ -100,7 +87,9 @@ export default function Devoluciones() {
                   className="flex w-full items-center justify-between px-4 py-3 text-left text-sm"
                 >
                   <span>
+                    <span className="font-mono text-xs text-gray-400">{folioVenta(v)}</span> ·{' '}
                     {v.fecha?.toDate ? v.fecha.toDate().toLocaleString() : '—'} ·{' '}
+                    <span className="capitalize text-gray-500">{v.metodoPago}</span> ·{' '}
                     <span className="text-gray-500">{v.vendedorEmail}</span>
                   </span>
                   <span className="font-semibold text-gray-800">
@@ -116,7 +105,8 @@ export default function Devoluciones() {
                         className="flex items-center justify-between text-sm text-gray-700"
                       >
                         <span>
-                          {item.nombre} × {item.cantidad} {item.unidad === 'g' ? 'g' : ''}
+                          {item.nombre} × {item.cantidad} {item.unidad === 'g' ? 'g' : ''} · $
+                          {Number(item.precioUnitario || 0).toFixed(2)}
                         </span>
                         <button
                           onClick={() => setItemADevolver({ venta: v, item })}
@@ -131,46 +121,76 @@ export default function Devoluciones() {
               </div>
             )
           })}
-          {ventas.length === 0 && (
-            <p className="text-sm text-gray-400">No hay ventas registradas todavía.</p>
+          {ventasFiltradas.length === 0 && (
+            <p className="text-sm text-gray-400">
+              {busqueda
+                ? `No se encontraron ventas recientes con "${busqueda}".`
+                : 'No hay ventas registradas todavía.'}
+            </p>
           )}
         </div>
 
-        <h2 className="mb-3 text-lg font-bold text-gray-800">Últimas devoluciones</h2>
+        <h2 className="mb-3 text-lg font-bold text-gray-800">📋 Historial de Devoluciones y Mermas</h2>
         <div className="overflow-x-auto rounded-lg bg-white shadow">
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100 text-left text-gray-600">
               <tr>
                 <th className="px-4 py-2">Fecha</th>
+                <th className="px-4 py-2">Folio</th>
                 <th className="px-4 py-2">Producto</th>
-                <th className="px-4 py-2">Cantidad</th>
-                <th className="px-4 py-2">Motivo</th>
+                <th className="px-4 py-2">Cant.</th>
                 <th className="px-4 py-2">Monto</th>
+                <th className="px-4 py-2">Motivo</th>
                 <th className="px-4 py-2">Registrada por</th>
+                <th className="px-4 py-2">Efecto Stock</th>
               </tr>
             </thead>
             <tbody>
               {devoluciones.map((d) => (
                 <tr key={d.id} className="border-t">
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2 whitespace-nowrap">
                     {d.fecha?.toDate ? d.fecha.toDate().toLocaleString() : '—'}
                   </td>
+                  <td className="px-4 py-2 font-mono font-semibold text-gray-700">
+                    {folioVenta({ folio: d.folio, id: d.ventaId })}
+                  </td>
                   <td className="px-4 py-2">{d.nombre}</td>
-                  <td className="px-4 py-2">{d.cantidad}</td>
+                  <td className="px-4 py-2">
+                    {d.cantidad} {d.unidad === 'g' ? 'g' : 'pza(s)'}
+                  </td>
+                  <td className="px-4 py-2 font-semibold text-red-600">
+                    -${Number(d.monto || 0).toFixed(2)}
+                  </td>
                   <td className="px-4 py-2">
                     {d.mercanciaPerdida ? (
-                      <span className="font-semibold text-red-600">Mercancía perdida</span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600">
+                        <span className="h-2 w-2 rounded-full bg-red-500" />
+                        Merma / Dañado
+                      </span>
                     ) : (
-                      <span className="text-green-600">Reingresó a stock</span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700">
+                        <span className="h-2 w-2 rounded-full bg-green-500" />
+                        Buen estado
+                      </span>
                     )}
                   </td>
-                  <td className="px-4 py-2">-${Number(d.monto || 0).toFixed(2)}</td>
                   <td className="px-4 py-2">{d.vendedorEmail}</td>
+                  <td className="px-4 py-2">
+                    {d.mercanciaPerdida ? (
+                      <span className="text-gray-500">
+                        Sin reingreso <span className="italic text-gray-400">(Pérdida)</span>
+                      </span>
+                    ) : (
+                      <span className="font-medium text-green-700">
+                        +{d.cantidad} al stock
+                      </span>
+                    )}
+                  </td>
                 </tr>
               ))}
               {devoluciones.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-6 text-center text-gray-400">
                     Aún no hay devoluciones registradas.
                   </td>
                 </tr>
