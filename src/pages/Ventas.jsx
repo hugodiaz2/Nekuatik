@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
   addDoc,
   collection,
@@ -37,7 +36,6 @@ function esMismoDia(fechaTimestamp) {
 
 export default function Ventas() {
   const { usuario } = useAuth()
-  const navigate = useNavigate()
   const [productos, setProductos] = useState([])
   const [ventasRecientes, setVentasRecientes] = useState([])
   const [devolucionesRecientes, setDevolucionesRecientes] = useState([])
@@ -224,10 +222,10 @@ export default function Ventas() {
         stats={
           <>
             <span className="text-sm text-gray-300">
-              num. ventas: <span className="font-semibold text-white">{numVentasHoy}</span>
+              Ventas hoy: <span className="font-semibold text-white">{numVentasHoy}</span>
             </span>
             <span className="text-sm text-gray-300">
-              acumulado $: <span className="font-semibold text-white">{acumuladoHoy.toFixed(2)}</span>
+              Acumulado: <span className="font-semibold text-white">${acumuladoHoy.toFixed(2)}</span>
             </span>
           </>
         }
@@ -236,7 +234,7 @@ export default function Ventas() {
           onClick={() => setMostrarHistorial(true)}
           className="rounded-md bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-300"
         >
-          historial
+          Historial
         </button>
         <button
           onClick={() => setMostrarDevolucion(true)}
@@ -254,7 +252,7 @@ export default function Ventas() {
             onChange={(e) => setBusqueda(e.target.value)}
             onKeyDown={handleBusquedaKeyDown}
             autoFocus
-            placeholder="detección de barras, búsqueda de producto....."
+            placeholder="Detección de barras o búsqueda de producto..."
             className="w-full rounded-md bg-gray-100 px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-neutral-800"
           />
           {sugerencias.length > 0 && (
@@ -333,7 +331,7 @@ export default function Ventas() {
                     onClick={() => quitarDelCarrito(item.id)}
                     className="rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-600"
                   >
-                    eliminar
+                    Eliminar
                   </button>
                 </div>
               )
@@ -433,7 +431,7 @@ function EfectivoModal({ total, procesando, onClose, onGuardar }) {
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">ingreso</label>
+            <label className="text-sm font-medium text-gray-700">Ingreso</label>
             <input
               type="number"
               min="0"
@@ -445,7 +443,7 @@ function EfectivoModal({ total, procesando, onClose, onGuardar }) {
             />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">cambio</span>
+            <span className="text-sm font-medium text-gray-700">Cambio</span>
             <span
               className={`rounded-md px-3 py-1.5 text-sm font-semibold ${
                 cambio < 0 ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-800'
@@ -458,14 +456,14 @@ function EfectivoModal({ total, procesando, onClose, onGuardar }) {
 
         <div className="flex justify-end gap-6 border-t px-6 py-4">
           <button onClick={onClose} className="text-sm font-medium text-gray-500 hover:text-gray-700">
-            cerrar
+            Cerrar
           </button>
           <button
             disabled={cambio < 0 || procesando}
             onClick={() => onGuardar(Number(ingreso || 0), cambio)}
             className="text-sm font-semibold text-green-600 hover:text-green-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {procesando ? 'guardando...' : 'guardar'}
+            {procesando ? 'Guardando...' : 'Guardar'}
           </button>
         </div>
       </div>
@@ -488,7 +486,7 @@ function TarjetaModal({ total, procesando, onClose, onGuardar }) {
           <p className="text-sm font-medium text-gray-700">Total: ${total.toFixed(2)}</p>
 
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">tipo de tarjeta</p>
+            <p className="mb-2 text-sm font-medium text-gray-700">Tipo de tarjeta</p>
             <select
               value={tipoTarjeta}
               onChange={(e) => setTipoTarjeta(e.target.value)}
@@ -509,7 +507,7 @@ function TarjetaModal({ total, procesando, onClose, onGuardar }) {
             onClick={() => onGuardar(tipoTarjeta)}
             className="text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-40"
           >
-            {procesando ? 'guardando...' : 'Guardar'}
+            {procesando ? 'Guardando...' : 'Guardar'}
           </button>
         </div>
       </div>
@@ -524,30 +522,30 @@ function HistorialModal({ ventas, onClose }) {
         <div className="flex items-center justify-between bg-neutral-900 px-5 py-3 text-white">
           <h2 className="font-semibold">Historial de ventas</h2>
           <button onClick={onClose} className="text-sm text-gray-300 hover:text-white">
-            cerrar ×
+            Cerrar ×
           </button>
         </div>
         <div className="max-h-[65vh] overflow-y-auto">
           <table className="min-w-full text-sm">
             <thead className="sticky top-0 bg-gray-100 text-left text-gray-600">
               <tr>
-                <th className="px-4 py-2">Folio</th>
-                <th className="px-4 py-2">Fecha</th>
-                <th className="px-4 py-2">Vendedor</th>
-                <th className="px-4 py-2">Pago</th>
-                <th className="px-4 py-2">Total</th>
+                <th className="px-4 py-3">Folio</th>
+                <th className="px-4 py-3">Fecha</th>
+                <th className="px-4 py-3">Vendedor</th>
+                <th className="px-4 py-3">Pago</th>
+                <th className="px-4 py-3">Total</th>
               </tr>
             </thead>
             <tbody>
               {ventas.map((v) => (
-                <tr key={v.id} className="border-t">
-                  <td className="px-4 py-2 font-mono text-xs text-gray-500">{folioVenta(v)}</td>
-                  <td className="px-4 py-2">
+                <tr key={v.id} className="border-t transition hover:bg-gray-50">
+                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{folioVenta(v)}</td>
+                  <td className="px-4 py-3">
                     {v.fecha?.toDate ? v.fecha.toDate().toLocaleString() : '—'}
                   </td>
-                  <td className="px-4 py-2">{v.vendedorEmail}</td>
-                  <td className="px-4 py-2 capitalize">{v.metodoPago}</td>
-                  <td className="px-4 py-2 font-semibold">${Number(v.total || 0).toFixed(2)}</td>
+                  <td className="px-4 py-3">{v.vendedorEmail}</td>
+                  <td className="px-4 py-3 capitalize">{v.metodoPago}</td>
+                  <td className="px-4 py-3 font-semibold">${Number(v.total || 0).toFixed(2)}</td>
                 </tr>
               ))}
               {ventas.length === 0 && (
@@ -655,7 +653,7 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
             <h2 className="text-lg font-semibold">Procesar Devolución</h2>
           </div>
           <button onClick={onClose} className="text-sm text-gray-300 hover:text-white">
-            cerrar ×
+            Cerrar ×
           </button>
         </div>
 

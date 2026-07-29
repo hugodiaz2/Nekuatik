@@ -84,7 +84,7 @@ export default function Devoluciones() {
               <div key={v.id} className="rounded-lg bg-white shadow">
                 <button
                   onClick={() => setVentaAbierta(abierta ? null : v.id)}
-                  className="flex w-full items-center justify-between px-4 py-3 text-left text-sm"
+                  className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-sm transition hover:bg-gray-50"
                 >
                   <span>
                     <span className="font-mono text-xs text-gray-400">{folioVenta(v)}</span> ·{' '}
@@ -135,33 +135,33 @@ export default function Devoluciones() {
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100 text-left text-gray-600">
               <tr>
-                <th className="px-4 py-2">Fecha</th>
-                <th className="px-4 py-2">Folio</th>
-                <th className="px-4 py-2">Producto</th>
-                <th className="px-4 py-2">Cant.</th>
-                <th className="px-4 py-2">Monto</th>
-                <th className="px-4 py-2">Motivo</th>
-                <th className="px-4 py-2">Registrada por</th>
-                <th className="px-4 py-2">Efecto Stock</th>
+                <th className="px-4 py-3">Fecha</th>
+                <th className="px-4 py-3">Folio</th>
+                <th className="px-4 py-3">Producto</th>
+                <th className="px-4 py-3">Cant.</th>
+                <th className="px-4 py-3">Monto</th>
+                <th className="px-4 py-3">Motivo</th>
+                <th className="px-4 py-3">Registrada por</th>
+                <th className="px-4 py-3">Efecto Stock</th>
               </tr>
             </thead>
             <tbody>
               {devoluciones.map((d) => (
-                <tr key={d.id} className="border-t">
-                  <td className="px-4 py-2 whitespace-nowrap">
+                <tr key={d.id} className="border-t transition hover:bg-gray-50">
+                  <td className="px-4 py-3 whitespace-nowrap">
                     {d.fecha?.toDate ? d.fecha.toDate().toLocaleString() : '—'}
                   </td>
-                  <td className="px-4 py-2 font-mono font-semibold text-gray-700">
+                  <td className="px-4 py-3 font-mono font-semibold text-gray-700">
                     {folioVenta({ folio: d.folio, id: d.ventaId })}
                   </td>
-                  <td className="px-4 py-2">{d.nombre}</td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-3">{d.nombre}</td>
+                  <td className="px-4 py-3">
                     {d.cantidad} {d.unidad === 'g' ? 'g' : 'pza(s)'}
                   </td>
-                  <td className="px-4 py-2 font-semibold text-red-600">
+                  <td className="px-4 py-3 font-semibold text-red-600">
                     -${Number(d.monto || 0).toFixed(2)}
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-3">
                     {d.mercanciaPerdida ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600">
                         <span className="h-2 w-2 rounded-full bg-red-500" />
@@ -174,8 +174,8 @@ export default function Devoluciones() {
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-2">{d.vendedorEmail}</td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-3">{d.vendedorEmail}</td>
+                  <td className="px-4 py-3">
                     {d.mercanciaPerdida ? (
                       <span className="text-gray-500">
                         Sin reingreso <span className="italic text-gray-400">(Pérdida)</span>

@@ -20,7 +20,7 @@ export default function Header({ title, stats, children }) {
           onClick={logout}
           className="text-sm font-semibold text-red-400 hover:text-red-300"
         >
-          cerrar sesión
+          Cerrar sesión
         </button>
       </div>
     </header>
