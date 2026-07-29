@@ -118,53 +118,53 @@ export default function Inventario() {
             </thead>
             <tbody>
               {filtrados.map((p, i) => (
-                <tr key={p.id} className="border-t">
-                  <td className="px-4 py-2 text-gray-400">{i + 1}</td>
-                  <td className="px-4 py-2 font-medium text-gray-800">{p.nombre}</td>
-                  <td className="px-4 py-2 text-gray-600">
+                <tr key={p.id} className="border-t transition hover:bg-gray-50">
+                  <td className="px-4 py-3 text-gray-400">{i + 1}</td>
+                  <td className="px-4 py-3 font-medium text-gray-800">{p.nombre}</td>
+                  <td className="px-4 py-3 text-gray-600">
                     {esGranel(p) ? 'Granel' : p.contenido || '—'}
                   </td>
                   <td
-                    className={`px-4 py-2 font-semibold ${
+                    className={`px-4 py-3 font-semibold ${
                       (p.stock ?? 0) <= (p.stockMinimo ?? 0) ? 'text-red-500' : 'text-gray-800'
                     }`}
                   >
                     {formatStock(p)}
                   </td>
-                  <td className="px-4 py-2 text-gray-600">{p.caducidad || '—'}</td>
-                  <td className="px-4 py-2 text-gray-800">
+                  <td className="px-4 py-3 text-gray-600">{p.caducidad || '—'}</td>
+                  <td className="px-4 py-3 text-gray-800">
                     ${Number(p.precio || 0).toFixed(2)}
                     {esGranel(p) && <span className="text-xs text-gray-400"> /100g</span>}
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-3">
                     <div className="flex gap-1.5">
                       <button
                         title="Agregar (registrar compra)"
                         onClick={() => setProductoAgregar(p)}
                         className="rounded bg-green-600 px-2 py-1 text-xs font-semibold text-white hover:bg-green-700"
                       >
-                        agregar
+                        Agregar
                       </button>
                       <button
                         title="Editar"
                         onClick={() => setProductoEditar(p)}
                         className="rounded bg-blue-600 px-2 py-1 text-xs font-semibold text-white hover:bg-blue-700"
                       >
-                        editar
+                        Editar
                       </button>
                       <button
                         title="Detalles de caducidad"
                         onClick={() => setProductoCaducidad(p)}
                         className="rounded bg-amber-700 px-2 py-1 text-xs font-semibold text-white hover:bg-amber-800"
                       >
-                        caducidad
+                        Caducidad
                       </button>
                       <button
                         title="Eliminar"
                         onClick={() => handleEliminar(p.id)}
                         className="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700"
                       >
-                        eliminar
+                        Eliminar
                       </button>
                     </div>
                   </td>
@@ -203,12 +203,17 @@ function ModalShell({ titulo, subtitulo, accionEtiqueta, onClose, children }) {
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-2xl overflow-hidden rounded-lg bg-white">
-        <div className="flex items-center justify-between bg-neutral-900 px-6 py-4 text-white">
+        <div className="flex items-center justify-between gap-4 bg-neutral-900 px-6 py-4 text-white">
           <div>
             <h2 className="text-lg font-semibold">{titulo}</h2>
             {subtitulo && <p className="text-xs text-gray-400">{subtitulo}</p>}
           </div>
-          {accionEtiqueta && <span className="text-xl">{accionEtiqueta}</span>}
+          <div className="flex shrink-0 items-center gap-3">
+            {accionEtiqueta && <span className="text-xl">{accionEtiqueta}</span>}
+            <button onClick={onClose} className="text-sm text-gray-300 hover:text-white">
+              Cerrar ×
+            </button>
+          </div>
         </div>
         <div className="max-h-[75vh] overflow-y-auto p-6">{children}</div>
       </div>
@@ -394,7 +399,7 @@ function NuevoProductoModal({ onClose }) {
                 value={form.contenido}
                 onChange={onChange}
                 className={inputClass}
-                placeholder='ej. "500g", "1 pieza"'
+                placeholder='Ej. "500g", "1 pieza"'
               />
             </div>
           </>
