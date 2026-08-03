@@ -221,10 +221,10 @@ export default function Ventas() {
         title="Punto de venta"
         stats={
           <>
-            <span className="text-sm text-gray-300">
+            <span className="text-sm text-white/60">
               Ventas hoy: <span className="font-semibold text-white">{numVentasHoy}</span>
             </span>
-            <span className="text-sm text-gray-300">
+            <span className="text-sm text-white/60">
               Acumulado: <span className="font-semibold text-white">${acumuladoHoy.toFixed(2)}</span>
             </span>
           </>
@@ -232,13 +232,13 @@ export default function Ventas() {
       >
         <button
           onClick={() => setMostrarHistorial(true)}
-          className="rounded-md bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-300"
+          className="rounded-lg bg-white/10 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/20"
         >
           Historial
         </button>
         <button
           onClick={() => setMostrarDevolucion(true)}
-          className="rounded-md bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-300"
+          className="rounded-lg bg-white/10 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/20"
         >
           ↩️ Hacer Devolución
         </button>
@@ -253,18 +253,18 @@ export default function Ventas() {
             onKeyDown={handleBusquedaKeyDown}
             autoFocus
             placeholder="Detección de barras o búsqueda de producto..."
-            className="w-full rounded-md bg-gray-100 px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-neutral-800"
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
           />
           {sugerencias.length > 0 && (
-            <ul className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg">
+            <ul className="absolute z-10 mt-1 w-full rounded-lg border border-white/10 bg-neutral-900 shadow-2xl shadow-black/40">
               {sugerencias.map((p) => (
                 <li key={p.id}>
                   <button
                     onClick={() => agregarAlCarrito(p)}
-                    className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-gray-50"
+                    className="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-white/80 hover:bg-white/5"
                   >
                     <span>{p.nombre}</span>
-                    <span className="text-gray-400">
+                    <span className="text-white/40">
                       ${Number(p.precio || 0).toFixed(2)}
                       {esGranel(p) ? ' /100g' : ''}
                     </span>
@@ -274,17 +274,17 @@ export default function Ventas() {
             </ul>
           )}
           {noHayCoincidencias && (
-            <div className="absolute z-10 mt-1 w-full rounded-md bg-white p-3 shadow-lg">
-              <p className="mb-1 text-sm text-gray-500">
+            <div className="absolute z-10 mt-1 w-full rounded-lg border border-white/10 bg-neutral-900 p-3 shadow-2xl shadow-black/40">
+              <p className="mb-1 text-sm text-white/50">
                 No se encontró "{busqueda}" en el inventario.
               </p>
-              <p className="mb-2 text-xs text-gray-400">
+              <p className="mb-2 text-xs text-white/40">
                 Recuerda: los productos individuales solo se encuentran escaneando o escribiendo
                 su código de barras exacto (no por nombre).
               </p>
               <button
                 onClick={() => setMostrarAltaRapida(true)}
-                className="w-full rounded-md bg-yellow-400 px-3 py-1.5 text-sm font-bold text-black hover:bg-yellow-300"
+                className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1.5 text-sm font-bold text-white shadow-lg shadow-orange-500/25 hover:brightness-110"
               >
                 + Agregar producto nuevo
               </button>
@@ -293,7 +293,7 @@ export default function Ventas() {
         </div>
 
         {carrito.length === 0 ? (
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-white/40">
             Busca o escanea un producto para agregarlo al ticket.
           </p>
         ) : (
@@ -304,13 +304,13 @@ export default function Ventas() {
               return (
                 <div key={item.id} className="flex items-center gap-4">
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-gray-800">{item.nombre}</p>
-                    <p className="text-xs text-gray-400 underline decoration-dotted">
+                    <p className="font-medium text-white">{item.nombre}</p>
+                    <p className="text-xs text-white/40 underline decoration-dotted">
                       {item.contenido || (granel ? 'Granel' : '—')} / $
                       {Number(item.precio || 0).toFixed(2)}
                       {granel ? ' /100g' : ''}
                     </p>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-white/50">
                       SUBTOTAL: <span className="font-semibold">${subtotal.toFixed(2)}</span>
                     </p>
                   </div>
@@ -321,15 +321,15 @@ export default function Ventas() {
                       step={granel ? '1' : '1'}
                       value={item.cantidad}
                       onChange={(e) => cambiarCantidad(item.id, e.target.value)}
-                      className="w-20 rounded-md bg-neutral-900 px-2 py-1.5 text-center text-sm font-semibold text-white"
+                      className="w-20 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-center text-sm font-semibold text-white outline-none focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/20"
                     />
-                    <span className="mt-1 text-[10px] uppercase tracking-wide text-gray-400">
+                    <span className="mt-1 text-[10px] uppercase tracking-wide text-white/40">
                       {granel ? 'gramos' : 'piezas'}
                     </span>
                   </div>
                   <button
                     onClick={() => quitarDelCarrito(item.id)}
-                    className="rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-600"
+                    className="rounded-lg bg-red-500/90 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-500"
                   >
                     Eliminar
                   </button>
@@ -339,24 +339,24 @@ export default function Ventas() {
           </div>
         )}
 
-        <p className="mb-4 text-xl font-bold text-gray-800">
+        <p className="mb-4 text-xl font-bold text-white">
           total=${total.toFixed(2)}
         </p>
 
-        {mensaje && <p className="mb-4 text-sm text-gray-600">{mensaje}</p>}
+        {mensaje && <p className="mb-4 text-sm text-white/60">{mensaje}</p>}
 
         <div className="flex gap-4">
           <button
             onClick={() => setModalPago('efectivo')}
             disabled={carrito.length === 0}
-            className="rounded-md border-2 border-green-500 px-4 py-2 text-sm font-semibold text-green-600 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-lg border-2 border-green-500/60 px-4 py-2 text-sm font-semibold text-green-400 hover:bg-green-500/10 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Compra efectivo
           </button>
           <button
             onClick={() => setModalPago('tarjeta')}
             disabled={carrito.length === 0}
-            className="rounded-md border-2 border-blue-400 px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-lg border-2 border-blue-400/60 px-4 py-2 text-sm font-semibold text-blue-400 hover:bg-blue-500/10 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Compra tarjeta
           </button>
@@ -416,22 +416,22 @@ function EfectivoModal({ total, procesando, onClose, onGuardar }) {
   const cambio = Number(ingreso || 0) - total
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-sm overflow-hidden rounded-lg bg-white">
-        <div className="flex items-center justify-between bg-neutral-900 px-5 py-3 text-white">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50">
+        <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-5 py-3 text-white">
           <h2 className="font-semibold">Efectivo</h2>
-          <span className="text-sm text-gray-300">Nekuatik</span>
+          <span className="text-sm text-white/60">Nekuatik</span>
         </div>
 
         <div className="space-y-4 p-6">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Total</span>
-            <span className="rounded-md bg-gray-100 px-3 py-1.5 text-sm">
+            <span className="text-sm font-medium text-white/70">Total</span>
+            <span className="rounded-lg bg-white/10 px-3 py-1.5 text-sm text-white">
               ${total.toFixed(2)}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">Ingreso</label>
+            <label className="text-sm font-medium text-white/70">Ingreso</label>
             <input
               type="number"
               min="0"
@@ -439,14 +439,14 @@ function EfectivoModal({ total, procesando, onClose, onGuardar }) {
               autoFocus
               value={ingreso}
               onChange={(e) => setIngreso(e.target.value)}
-              className="w-32 rounded-md bg-gray-100 px-3 py-1.5 text-right text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+              className="w-32 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-right text-sm text-white outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
             />
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Cambio</span>
+            <span className="text-sm font-medium text-white/70">Cambio</span>
             <span
               className={`rounded-md px-3 py-1.5 text-sm font-semibold ${
-                cambio < 0 ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-800'
+                cambio < 0 ? 'bg-red-500/10 text-red-400' : 'bg-white/10 text-white'
               }`}
             >
               ${cambio.toFixed(2)}
@@ -454,14 +454,14 @@ function EfectivoModal({ total, procesando, onClose, onGuardar }) {
           </div>
         </div>
 
-        <div className="flex justify-end gap-6 border-t px-6 py-4">
-          <button onClick={onClose} className="text-sm font-medium text-gray-500 hover:text-gray-700">
+        <div className="flex justify-end gap-6 border-t border-white/10 px-6 py-4">
+          <button onClick={onClose} className="text-sm font-medium text-white/50 hover:text-white">
             Cerrar
           </button>
           <button
             disabled={cambio < 0 || procesando}
             onClick={() => onGuardar(Number(ingreso || 0), cambio)}
-            className="text-sm font-semibold text-green-600 hover:text-green-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="text-sm font-semibold text-green-400 hover:text-green-300 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {procesando ? 'Guardando...' : 'Guardar'}
           </button>
@@ -475,22 +475,22 @@ function TarjetaModal({ total, procesando, onClose, onGuardar }) {
   const [tipoTarjeta, setTipoTarjeta] = useState('debito')
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-sm overflow-hidden rounded-lg bg-white">
-        <div className="flex items-center justify-between bg-neutral-900 px-5 py-3 text-white">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50">
+        <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-5 py-3 text-white">
           <h2 className="font-semibold">Tarjeta</h2>
-          <span className="text-sm text-gray-300">Nekuatik</span>
+          <span className="text-sm text-white/60">Nekuatik</span>
         </div>
 
         <div className="space-y-4 p-6">
-          <p className="text-sm font-medium text-gray-700">Total: ${total.toFixed(2)}</p>
+          <p className="text-sm font-medium text-white/70">Total: ${total.toFixed(2)}</p>
 
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">Tipo de tarjeta</p>
+            <p className="mb-2 text-sm font-medium text-white/70">Tipo de tarjeta</p>
             <select
               value={tipoTarjeta}
               onChange={(e) => setTipoTarjeta(e.target.value)}
-              className="w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
             >
               <option value="debito">Débito</option>
               <option value="credito">Crédito</option>
@@ -498,14 +498,14 @@ function TarjetaModal({ total, procesando, onClose, onGuardar }) {
           </div>
         </div>
 
-        <div className="flex justify-end gap-6 border-t px-6 py-4">
-          <button onClick={onClose} className="text-sm font-medium text-gray-500 hover:text-gray-700">
+        <div className="flex justify-end gap-6 border-t border-white/10 px-6 py-4">
+          <button onClick={onClose} className="text-sm font-medium text-white/50 hover:text-white">
             Cancelar
           </button>
           <button
             disabled={procesando}
             onClick={() => onGuardar(tipoTarjeta)}
-            className="text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-40"
+            className="text-sm font-semibold text-blue-400 hover:text-blue-300 disabled:opacity-40"
           >
             {procesando ? 'Guardando...' : 'Guardar'}
           </button>
@@ -517,17 +517,17 @@ function TarjetaModal({ total, procesando, onClose, onGuardar }) {
 
 function HistorialModal({ ventas, onClose }) {
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50">
-      <div className="max-h-[80vh] w-full max-w-2xl overflow-hidden rounded-lg bg-white">
-        <div className="flex items-center justify-between bg-neutral-900 px-5 py-3 text-white">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="max-h-[80vh] w-full max-w-2xl overflow-hidden rounded-xl border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50">
+        <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-5 py-3 text-white">
           <h2 className="font-semibold">Historial de ventas</h2>
-          <button onClick={onClose} className="text-sm text-gray-300 hover:text-white">
+          <button onClick={onClose} className="text-sm text-white/60 hover:text-white">
             Cerrar ×
           </button>
         </div>
         <div className="max-h-[65vh] overflow-y-auto">
-          <table className="min-w-full text-sm">
-            <thead className="sticky top-0 bg-gray-100 text-left text-gray-600">
+          <table className="min-w-full text-sm text-white">
+            <thead className="sticky top-0 bg-white/[0.06] text-left text-white/60">
               <tr>
                 <th className="px-4 py-3">Folio</th>
                 <th className="px-4 py-3">Fecha</th>
@@ -538,8 +538,8 @@ function HistorialModal({ ventas, onClose }) {
             </thead>
             <tbody>
               {ventas.map((v) => (
-                <tr key={v.id} className="border-t transition hover:bg-gray-50">
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{folioVenta(v)}</td>
+                <tr key={v.id} className="border-t border-white/10 transition hover:bg-white/5">
+                  <td className="px-4 py-3 font-mono text-xs text-white/50">{folioVenta(v)}</td>
                   <td className="px-4 py-3">
                     {v.fecha?.toDate ? v.fecha.toDate().toLocaleString() : '—'}
                   </td>
@@ -550,7 +550,7 @@ function HistorialModal({ ventas, onClose }) {
               ))}
               {ventas.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
+                  <td colSpan={5} className="px-4 py-6 text-center text-white/40">
                     Aún no hay ventas registradas.
                   </td>
                 </tr>
@@ -645,25 +645,25 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg bg-white">
-        <div className="flex items-center justify-between bg-neutral-900 px-6 py-4 text-white">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50">
+        <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-6 py-4 text-white">
           <div className="flex items-center gap-2">
             <span className="text-xl">↩️</span>
             <h2 className="text-lg font-semibold">Procesar Devolución</h2>
           </div>
-          <button onClick={onClose} className="text-sm text-gray-300 hover:text-white">
+          <button onClick={onClose} className="text-sm text-white/60 hover:text-white">
             Cerrar ×
           </button>
         </div>
 
         {exito ? (
           <div className="p-6">
-            <p className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-700">{exito}</p>
+            <p className="rounded-lg bg-green-500/10 px-4 py-3 text-sm text-green-400">{exito}</p>
             <div className="mt-4 flex justify-end">
               <button
                 onClick={onClose}
-                className="rounded-md bg-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+                className="rounded-lg bg-white/10 px-5 py-2 text-sm font-semibold text-white hover:bg-white/20"
               >
                 Cerrar
               </button>
@@ -672,7 +672,7 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
         ) : (
           <div className="flex flex-1 flex-col overflow-hidden sm:flex-row">
             <div className="flex w-full flex-col border-b p-5 sm:w-2/5 sm:border-b-0 sm:border-r">
-              <label className="mb-1 text-sm font-medium text-gray-700">
+              <label className="mb-1 text-sm font-medium text-white/70">
                 Buscar por Producto o Folio
               </label>
               <input
@@ -681,9 +681,9 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 placeholder="Ej. Jamoncillo o FOL-102..."
-                className="mb-3 w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                className="mb-3 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
               />
-              <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wide text-white/40">
                 {busqueda.trim() ? 'Resultados' : 'Ventas recientes (hoy)'}
               </p>
               <div className="flex-1 space-y-2 overflow-y-auto">
@@ -693,19 +693,19 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
                     <button
                       key={v.id}
                       onClick={() => seleccionarVenta(v)}
-                      className={`w-full rounded-md border px-3 py-2 text-left text-sm transition ${
-                        seleccionada ? 'border-orange-500 bg-orange-50' : 'hover:bg-gray-50'
+                      className={`w-full rounded-lg border border-white/10 px-3 py-2 text-left text-sm text-white transition ${
+                        seleccionada ? 'border-orange-500 bg-orange-500/10' : 'hover:bg-white/5'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-mono font-semibold text-gray-800">
+                        <span className="font-mono font-semibold text-white">
                           {folioVenta(v)}
                         </span>
-                        <span className="font-semibold text-gray-800">
+                        <span className="font-semibold text-white">
                           ${Number(v.total || 0).toFixed(2)}
                         </span>
                       </div>
-                      <div className="mt-0.5 flex items-center justify-between text-xs text-gray-500">
+                      <div className="mt-0.5 flex items-center justify-between text-xs text-white/50">
                         <span>
                           {v.fecha?.toDate
                             ? v.fecha.toDate().toLocaleTimeString([], {
@@ -715,13 +715,13 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
                             : '—'}{' '}
                           · <span className="capitalize">{v.metodoPago}</span>
                         </span>
-                        <span className="text-orange-600">Ver productos →</span>
+                        <span className="text-orange-400">Ver productos →</span>
                       </div>
                     </button>
                   )
                 })}
                 {listaVentas.length === 0 && (
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-white/40">
                     {busqueda.trim()
                       ? `Sin resultados para "${busqueda}".`
                       : 'No hay ventas registradas hoy todavía.'}
@@ -732,32 +732,32 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
 
             <div className="flex w-full flex-col overflow-y-auto p-5 sm:w-3/5">
               {!ventaSeleccionada ? (
-                <p className="m-auto max-w-xs text-center text-sm text-gray-400">
+                <p className="m-auto max-w-xs text-center text-sm text-white/40">
                   Elige una venta de la lista para ver sus productos.
                 </p>
               ) : (
                 <div className="space-y-4">
-                  <div className="rounded-md border border-orange-200 bg-orange-50 px-4 py-3 text-sm">
-                    <span className="text-gray-600">Venta Seleccionada: </span>
-                    <span className="font-mono font-semibold text-gray-800">
+                  <div className="rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-3 text-sm text-white">
+                    <span className="text-white/60">Venta Seleccionada: </span>
+                    <span className="font-mono font-semibold text-white">
                       {folioVenta(ventaSeleccionada)}
                     </span>
-                    <span className="float-right text-gray-600">
+                    <span className="float-right text-white/60">
                       Total Original:{' '}
-                      <span className="font-semibold text-gray-800">
+                      <span className="font-semibold text-white">
                         ${Number(ventaSeleccionada.total || 0).toFixed(2)}
                       </span>
                     </span>
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                    <label className="mb-1 block text-sm font-medium text-white/70">
                       Selecciona el Dulce a Devolver
                     </label>
                     <select
                       value={itemIdx}
                       onChange={(e) => fijarItem(ventaSeleccionada, Number(e.target.value))}
-                      className="w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
                     >
                       {(ventaSeleccionada.items || []).map((it, idx) => (
                         <option key={idx} value={idx}>
@@ -771,7 +771,7 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
                   {item && (
                     <>
                       <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label className="mb-1 block text-sm font-medium text-white/70">
                           Cantidad a Devolver {item.unidad === 'g' ? '(g)' : ''}
                         </label>
                         <div className="flex items-center gap-3">
@@ -781,20 +781,20 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
                             max={item.cantidad}
                             value={cantidad}
                             onChange={(e) => actualizarCantidad(e.target.value)}
-                            className="w-32 rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                            className="w-32 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
                           />
-                          <span className="text-sm text-gray-400">
+                          <span className="text-sm text-white/40">
                             Máx: {item.cantidad} {item.unidad === 'g' ? 'g' : ''}
                           </span>
                         </div>
                       </div>
 
                       <div>
-                        <p className="mb-2 text-sm font-medium text-gray-700">
+                        <p className="mb-2 text-sm font-medium text-white/70">
                           Motivo de la devolución
                         </p>
                         <div className="space-y-2">
-                          <label className="flex items-center gap-2 rounded-md border p-3 text-sm has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                          <label className="flex items-center gap-2 rounded-lg border border-white/10 p-3 text-sm text-white has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10">
                             <input
                               type="radio"
                               name="motivo-rapido"
@@ -804,13 +804,13 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
                             <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-green-500" />
                             <span>
                               <span className="font-medium">Cliente se arrepintió:</span>{' '}
-                              <span className="text-gray-600">Producto intacto.</span>{' '}
-                              <span className="text-xs italic text-gray-400">
+                              <span className="text-white/60">Producto intacto.</span>{' '}
+                              <span className="text-xs italic text-white/40">
                                 (Regresa a stock en BD)
                               </span>
                             </span>
                           </label>
-                          <label className="flex items-center gap-2 rounded-md border p-3 text-sm has-[:checked]:border-red-500 has-[:checked]:bg-red-50">
+                          <label className="flex items-center gap-2 rounded-lg border border-white/10 p-3 text-sm text-white has-[:checked]:border-red-500 has-[:checked]:bg-red-500/10">
                             <input
                               type="radio"
                               name="motivo-rapido"
@@ -820,8 +820,8 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
                             <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-red-500" />
                             <span>
                               <span className="font-medium">Producto dañado / Merma:</span>{' '}
-                              <span className="text-gray-600">Empaque roto/caducado.</span>{' '}
-                              <span className="text-xs italic text-gray-400">
+                              <span className="text-white/60">Empaque roto/caducado.</span>{' '}
+                              <span className="text-xs italic text-white/40">
                                 (NO regresa a stock)
                               </span>
                             </span>
@@ -830,7 +830,7 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
                       </div>
 
                       <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label className="mb-1 block text-sm font-medium text-white/70">
                           Monto a reembolsar
                         </label>
                         <input
@@ -839,15 +839,15 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
                           min="0"
                           value={monto}
                           onChange={(e) => setMonto(e.target.value)}
-                          className="w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
                         />
-                        <p className="mt-1 text-xs text-gray-400">
+                        <p className="mt-1 text-xs text-white/40">
                           Se calcula automático; ajústalo si el reembolso es parcial.
                         </p>
                       </div>
 
                       {error && (
-                        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+                        <p className="rounded-md bg-red-500/10 px-3 py-2 text-sm text-red-400">
                           {error}
                         </p>
                       )}
@@ -860,10 +860,10 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
         )}
 
         {!exito && ventaSeleccionada && (
-          <div className="flex justify-end gap-3 border-t px-6 py-4">
+          <div className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
             <button
               onClick={volver}
-              className="rounded-md border border-gray-300 bg-white px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-white/15 bg-white/5 px-5 py-2 text-sm font-semibold text-white hover:bg-white/10"
             >
               Volver
             </button>
@@ -871,7 +871,7 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
               <button
                 onClick={handleConfirmar}
                 disabled={guardando || cantidad <= 0}
-                className="rounded-md bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+                className="rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 hover:brightness-110 disabled:opacity-50"
               >
                 {guardando ? 'Guardando...' : `Guardar ($${(Number(monto) || 0).toFixed(2)})`}
               </button>
@@ -884,7 +884,7 @@ function DevolucionRapidaModal({ ventas, usuario, onClose }) {
 }
 
 const altaInputClass =
-  'w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800'
+  'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20'
 
 function AltaRapidaModal({ textoInicial, onClose, onCreado }) {
   const pareceCodigoBarras = /^\d{6,}$/.test(textoInicial.trim())
@@ -938,16 +938,16 @@ function AltaRapidaModal({ textoInicial, onClose, onCreado }) {
   }
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md overflow-hidden rounded-lg bg-white">
-        <div className="bg-neutral-900 px-6 py-4 text-white">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-xl border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50">
+        <div className="border-b border-white/10 bg-white/[0.03] px-6 py-4 text-white">
           <h2 className="text-lg font-semibold">Alta rápida de producto</h2>
-          <p className="text-xs text-gray-400">Se agrega al inventario y al ticket al instante.</p>
+          <p className="text-xs text-white/40">Se agrega al inventario y al ticket al instante.</p>
         </div>
 
         <div className="space-y-3 p-6">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Nombre</label>
+            <label className="mb-1 block text-sm font-medium text-white/70">Nombre</label>
             <input
               name="nombre"
               value={form.nombre}
@@ -957,7 +957,7 @@ function AltaRapidaModal({ textoInicial, onClose, onCreado }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Código de barras</label>
+            <label className="mb-1 block text-sm font-medium text-white/70">Código de barras</label>
             <input
               name="codigoBarras"
               value={form.codigoBarras}
@@ -966,7 +966,7 @@ function AltaRapidaModal({ textoInicial, onClose, onCreado }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Categoría</label>
+            <label className="mb-1 block text-sm font-medium text-white/70">Categoría</label>
             <select name="categoria" value={form.categoria} onChange={onChange} className={altaInputClass}>
               {CATEGORIAS.map((c) => (
                 <option key={c} value={c}>
@@ -977,7 +977,7 @@ function AltaRapidaModal({ textoInicial, onClose, onCreado }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-white/70">
                 {granel ? 'Precio (por 100g)' : 'Precio'}
               </label>
               <input
@@ -990,7 +990,7 @@ function AltaRapidaModal({ textoInicial, onClose, onCreado }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-white/70">
                 Stock inicial {granel && '(g)'}
               </label>
               <input
@@ -1005,20 +1005,20 @@ function AltaRapidaModal({ textoInicial, onClose, onCreado }) {
         </div>
 
         {error && (
-          <p className="mx-6 mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+          <p className="mx-6 mb-3 rounded-md bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</p>
         )}
 
-        <div className="flex justify-end gap-3 border-t px-6 py-4">
+        <div className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
           <button
             onClick={onClose}
-            className="rounded-md bg-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+            className="rounded-lg bg-white/10 px-5 py-2 text-sm font-semibold text-white hover:bg-white/20"
           >
             Cerrar
           </button>
           <button
             onClick={handleGuardar}
             disabled={guardando}
-            className="rounded-md bg-yellow-400 px-5 py-2 text-sm font-bold text-black hover:bg-yellow-300 disabled:opacity-50"
+            className="rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-2 text-sm font-bold text-white shadow-lg shadow-orange-500/25 hover:brightness-110 disabled:opacity-50"
           >
             {guardando ? 'Guardando...' : 'Guardar y agregar al ticket'}
           </button>

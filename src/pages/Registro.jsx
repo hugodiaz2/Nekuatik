@@ -15,6 +15,18 @@ const PARTICULAS = [
   { emoji: '🍫', left: '90%', duration: '25s', delay: '6s', size: 'text-xl' },
 ]
 
+function IconoUsuario() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+      />
+    </svg>
+  )
+}
+
 function IconoCorreo() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
@@ -63,11 +75,19 @@ function IconoOjo({ tachado }) {
   )
 }
 
-export default function Login() {
-  const { login } = useAuth()
+const MENSAJES_ERROR = {
+  'auth/email-already-in-use': 'Ese correo ya tiene una cuenta registrada.',
+  'auth/invalid-email': 'El correo electrónico no es válido.',
+  'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+}
+
+export default function Registro() {
+  const { register } = useAuth()
   const navigate = useNavigate()
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmarPassword, setConfirmarPassword] = useState('')
   const [mostrarPassword, setMostrarPassword] = useState(false)
   const [error, setError] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -75,12 +95,26 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+
+    if (username.trim().length < 3) {
+      setError('El usuario debe tener al menos 3 caracteres.')
+      return
+    }
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres.')
+      return
+    }
+    if (password !== confirmarPassword) {
+      setError('Las contraseñas no coinciden.')
+      return
+    }
+
     setEnviando(true)
     try {
-      await login(email, password)
+      await register(email, password, username.trim())
       navigate('/ventas')
-    } catch {
-      setError('Correo o contraseña incorrectos.')
+    } catch (err) {
+      setError(MENSAJES_ERROR[err.code] ?? 'No se pudo crear la cuenta. Intenta de nuevo.')
     } finally {
       setEnviando(false)
     }
@@ -126,7 +160,7 @@ export default function Login() {
             <h1 className="bg-gradient-to-r from-orange-300 via-amber-200 to-orange-300 bg-clip-text text-2xl font-bold tracking-wide text-transparent">
               NEKUATIK
             </h1>
-            <p className="mt-1 text-sm text-white/50">Sistema de punto de venta e inventario</p>
+            <p className="mt-1 text-sm text-white/50">Crear cuenta de empleado</p>
           </div>
         </div>
 
@@ -137,6 +171,27 @@ export default function Login() {
         )}
 
         <div className="space-y-4">
+          <div>
+            <label htmlFor="username" className="mb-1 block text-sm font-medium text-white/70">
+              Usuario
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-white/35">
+                <IconoUsuario />
+              </span>
+              <input
+                id="username"
+                type="text"
+                required
+                minLength={3}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full rounded-lg border border-white/10 bg-white/5 py-2.5 pr-3 pl-10 text-sm text-white placeholder-white/30 outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
+                placeholder="nombre.apellido"
+              />
+            </div>
+          </div>
+
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-white/70">
               Correo electrónico
@@ -169,6 +224,7 @@ export default function Login() {
                 id="password"
                 type={mostrarPassword ? 'text' : 'password'}
                 required
+                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-lg border border-white/10 bg-white/5 py-2.5 pr-10 pl-10 text-sm text-white placeholder-white/30 outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
@@ -184,6 +240,27 @@ export default function Login() {
               </button>
             </div>
           </div>
+
+          <div>
+            <label htmlFor="confirmarPassword" className="mb-1 block text-sm font-medium text-white/70">
+              Confirmar contraseña
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-white/35">
+                <IconoCandado />
+              </span>
+              <input
+                id="confirmarPassword"
+                type={mostrarPassword ? 'text' : 'password'}
+                required
+                minLength={6}
+                value={confirmarPassword}
+                onChange={(e) => setConfirmarPassword(e.target.value)}
+                className="w-full rounded-lg border border-white/10 bg-white/5 py-2.5 pr-3 pl-10 text-sm text-white placeholder-white/30 outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
         </div>
 
         <button
@@ -191,17 +268,15 @@ export default function Login() {
           disabled={enviando}
           className="mt-7 w-full rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 transition hover:shadow-xl hover:shadow-orange-500/40 hover:brightness-110 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
         >
-          {enviando ? 'Ingresando...' : 'Iniciar sesión'}
+          {enviando ? 'Creando cuenta...' : 'Crear cuenta'}
         </button>
 
         <p className="mt-6 text-center text-sm text-white/50">
-          ¿No tienes cuenta?{' '}
-          <Link to="/registro" className="font-medium text-orange-300 hover:text-orange-200">
-            Crear cuenta
+          ¿Ya tienes cuenta?{' '}
+          <Link to="/login" className="font-medium text-orange-300 hover:text-orange-200">
+            Inicia sesión
           </Link>
         </p>
-
-        <p className="mt-4 text-center text-xs text-white/30">🍬 Dulcería Nekuatik</p>
       </form>
     </div>
   )

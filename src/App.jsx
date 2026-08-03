@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import Registro from './pages/Registro'
 import Inventario from './pages/Inventario'
 import Ventas from './pages/Ventas'
 import Devoluciones from './pages/Devoluciones'
@@ -13,6 +14,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/registro" element={<Registro />} />
 
           <Route
             element={

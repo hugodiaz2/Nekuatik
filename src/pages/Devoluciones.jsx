@@ -59,7 +59,7 @@ export default function Devoluciones() {
       <Header title="Devoluciones" />
 
       <div className="p-6">
-        <p className="mb-4 text-sm text-gray-500">
+        <p className="mb-4 text-sm text-white/50">
           Selecciona una venta reciente para devolver alguno de sus productos. Si el producto
           sigue en buen estado, el stock se reintegra al inventario; si es mercancía dañada,
           caduca o en mal estado, se descuenta como pérdida (no vuelve a venderse) pero igual se
@@ -67,42 +67,42 @@ export default function Devoluciones() {
           día.
         </p>
 
-        {mensaje && <p className="mb-4 text-sm text-gray-700">{mensaje}</p>}
+        {mensaje && <p className="mb-4 text-sm text-white/70">{mensaje}</p>}
 
         <input
           type="text"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
           placeholder="Buscar por Producto o Folio (ej. Jamoncillo o FOL-102)..."
-          className="mb-4 w-full max-w-md rounded-md bg-gray-100 px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-neutral-800"
+          className="mb-4 w-full max-w-md rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
         />
 
         <div className="mb-8 space-y-2">
           {ventasFiltradas.map((v) => {
             const abierta = ventaAbierta === v.id
             return (
-              <div key={v.id} className="rounded-lg bg-white shadow">
+              <div key={v.id} className="rounded-lg border border-white/10 bg-white/[0.04] shadow-lg shadow-black/20">
                 <button
                   onClick={() => setVentaAbierta(abierta ? null : v.id)}
-                  className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-sm transition hover:bg-gray-50"
+                  className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-sm text-white transition hover:bg-white/5"
                 >
                   <span>
-                    <span className="font-mono text-xs text-gray-400">{folioVenta(v)}</span> ·{' '}
+                    <span className="font-mono text-xs text-white/40">{folioVenta(v)}</span> ·{' '}
                     {v.fecha?.toDate ? v.fecha.toDate().toLocaleString() : '—'} ·{' '}
-                    <span className="capitalize text-gray-500">{v.metodoPago}</span> ·{' '}
-                    <span className="text-gray-500">{v.vendedorEmail}</span>
+                    <span className="capitalize text-white/50">{v.metodoPago}</span> ·{' '}
+                    <span className="text-white/50">{v.vendedorEmail}</span>
                   </span>
-                  <span className="font-semibold text-gray-800">
+                  <span className="font-semibold text-white">
                     ${Number(v.total || 0).toFixed(2)} {abierta ? '▲' : '▼'}
                   </span>
                 </button>
 
                 {abierta && (
-                  <div className="space-y-2 border-t px-4 py-3">
+                  <div className="space-y-2 border-t border-white/10 px-4 py-3">
                     {(v.items || []).map((item, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between text-sm text-gray-700"
+                        className="flex items-center justify-between text-sm text-white/70"
                       >
                         <span>
                           {item.nombre} × {item.cantidad} {item.unidad === 'g' ? 'g' : ''} · $
@@ -110,7 +110,7 @@ export default function Devoluciones() {
                         </span>
                         <button
                           onClick={() => setItemADevolver({ venta: v, item })}
-                          className="rounded bg-orange-500 px-3 py-1 text-xs font-semibold text-white hover:bg-orange-600"
+                          className="rounded-md bg-orange-500/90 px-3 py-1 text-xs font-semibold text-white hover:bg-orange-500"
                         >
                           Devolver
                         </button>
@@ -122,7 +122,7 @@ export default function Devoluciones() {
             )
           })}
           {ventasFiltradas.length === 0 && (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-white/40">
               {busqueda
                 ? `No se encontraron ventas recientes con "${busqueda}".`
                 : 'No hay ventas registradas todavía.'}
@@ -130,10 +130,10 @@ export default function Devoluciones() {
           )}
         </div>
 
-        <h2 className="mb-3 text-lg font-bold text-gray-800">📋 Historial de Devoluciones y Mermas</h2>
-        <div className="overflow-x-auto rounded-lg bg-white shadow">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-100 text-left text-gray-600">
+        <h2 className="mb-3 text-lg font-bold text-white">📋 Historial de Devoluciones y Mermas</h2>
+        <div className="overflow-x-auto rounded-lg border border-white/10 bg-white/[0.04] shadow-lg shadow-black/20">
+          <table className="min-w-full text-sm text-white">
+            <thead className="bg-white/[0.06] text-left text-white/60">
               <tr>
                 <th className="px-4 py-3">Fecha</th>
                 <th className="px-4 py-3">Folio</th>
@@ -147,28 +147,28 @@ export default function Devoluciones() {
             </thead>
             <tbody>
               {devoluciones.map((d) => (
-                <tr key={d.id} className="border-t transition hover:bg-gray-50">
+                <tr key={d.id} className="border-t border-white/10 transition hover:bg-white/5">
                   <td className="px-4 py-3 whitespace-nowrap">
                     {d.fecha?.toDate ? d.fecha.toDate().toLocaleString() : '—'}
                   </td>
-                  <td className="px-4 py-3 font-mono font-semibold text-gray-700">
+                  <td className="px-4 py-3 font-mono font-semibold text-white/70">
                     {folioVenta({ folio: d.folio, id: d.ventaId })}
                   </td>
                   <td className="px-4 py-3">{d.nombre}</td>
                   <td className="px-4 py-3">
                     {d.cantidad} {d.unidad === 'g' ? 'g' : 'pza(s)'}
                   </td>
-                  <td className="px-4 py-3 font-semibold text-red-600">
+                  <td className="px-4 py-3 font-semibold text-red-400">
                     -${Number(d.monto || 0).toFixed(2)}
                   </td>
                   <td className="px-4 py-3">
                     {d.mercanciaPerdida ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-semibold text-red-400">
                         <span className="h-2 w-2 rounded-full bg-red-500" />
                         Merma / Dañado
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/15 px-2.5 py-1 text-xs font-semibold text-green-400">
                         <span className="h-2 w-2 rounded-full bg-green-500" />
                         Buen estado
                       </span>
@@ -177,11 +177,11 @@ export default function Devoluciones() {
                   <td className="px-4 py-3">{d.vendedorEmail}</td>
                   <td className="px-4 py-3">
                     {d.mercanciaPerdida ? (
-                      <span className="text-gray-500">
-                        Sin reingreso <span className="italic text-gray-400">(Pérdida)</span>
+                      <span className="text-white/50">
+                        Sin reingreso <span className="italic text-white/40">(Pérdida)</span>
                       </span>
                     ) : (
-                      <span className="font-medium text-green-700">
+                      <span className="font-medium text-green-400">
                         +{d.cantidad} al stock
                       </span>
                     )}
@@ -190,7 +190,7 @@ export default function Devoluciones() {
               ))}
               {devoluciones.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-6 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-6 text-center text-white/40">
                     Aún no hay devoluciones registradas.
                   </td>
                 </tr>
@@ -235,18 +235,18 @@ function DevolucionModal({ venta, item, onClose, onConfirmar }) {
   }
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md overflow-hidden rounded-lg bg-white">
-        <div className="bg-neutral-900 px-6 py-4 text-white">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-xl border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50">
+        <div className="border-b border-white/10 bg-white/[0.03] px-6 py-4 text-white">
           <h2 className="text-lg font-semibold">Devolver: {item.nombre}</h2>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-white/40">
             Vendido: {item.cantidad} {item.unidad === 'g' ? 'g' : 'pzas'}
           </p>
         </div>
 
         <div className="space-y-4 p-6">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-white/70">
               Cantidad a devolver {item.unidad === 'g' ? '(g)' : ''}
             </label>
             <input
@@ -255,14 +255,14 @@ function DevolucionModal({ venta, item, onClose, onConfirmar }) {
               max={item.cantidad}
               value={cantidad}
               onChange={(e) => actualizarCantidad(e.target.value)}
-              className="w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
             />
           </div>
 
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">Motivo</p>
+            <p className="mb-2 text-sm font-medium text-white/70">Motivo</p>
             <div className="space-y-2">
-              <label className="flex items-start gap-2 rounded-md border p-3 text-sm has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+              <label className="flex items-start gap-2 rounded-lg border border-white/10 p-3 text-sm text-white has-[:checked]:border-green-500 has-[:checked]:bg-green-500/10">
                 <input
                   type="radio"
                   name="motivo"
@@ -273,12 +273,12 @@ function DevolucionModal({ venta, item, onClose, onConfirmar }) {
                 <span>
                   <span className="font-medium">Cambio / cliente se arrepintió</span>
                   <br />
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-white/50">
                     El producto sigue en buen estado y regresa al inventario.
                   </span>
                 </span>
               </label>
-              <label className="flex items-start gap-2 rounded-md border p-3 text-sm has-[:checked]:border-red-500 has-[:checked]:bg-red-50">
+              <label className="flex items-start gap-2 rounded-lg border border-white/10 p-3 text-sm text-white has-[:checked]:border-red-500 has-[:checked]:bg-red-500/10">
                 <input
                   type="radio"
                   name="motivo"
@@ -289,7 +289,7 @@ function DevolucionModal({ venta, item, onClose, onConfirmar }) {
                 <span>
                   <span className="font-medium">Producto dañado, endurecido o vencido</span>
                   <br />
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-white/50">
                     Es mercancía perdida: NO regresa al stock, pero igual se le devuelve el
                     dinero al cliente.
                   </span>
@@ -299,7 +299,7 @@ function DevolucionModal({ venta, item, onClose, onConfirmar }) {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-white/70">
               Monto a reembolsar
             </label>
             <input
@@ -308,25 +308,25 @@ function DevolucionModal({ venta, item, onClose, onConfirmar }) {
               min="0"
               value={monto}
               onChange={(e) => setMonto(e.target.value)}
-              className="w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800"
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20"
             />
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-white/40">
               Se calcula automático según lo vendido; puedes ajustarlo si el reembolso es parcial.
             </p>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t px-6 py-4">
+        <div className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
           <button
             onClick={onClose}
-            className="rounded-md bg-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+            className="rounded-lg bg-white/10 px-5 py-2 text-sm font-semibold text-white hover:bg-white/20"
           >
             Cancelar
           </button>
           <button
             onClick={handleConfirmar}
             disabled={guardando || cantidad <= 0}
-            className="rounded-md bg-orange-500 px-5 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+            className="rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 hover:brightness-110 disabled:opacity-50"
           >
             {guardando ? 'Guardando...' : 'Confirmar devolución'}
           </button>
