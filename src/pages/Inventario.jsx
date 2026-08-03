@@ -69,22 +69,22 @@ export default function Inventario() {
       <Header title="Sección de inventario">
         <button
           onClick={() => setModalNuevo(true)}
-          className="rounded-md bg-yellow-400 px-4 py-1.5 text-sm font-bold text-black hover:bg-yellow-300"
+          className="rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-1.5 text-sm font-bold text-white shadow-lg shadow-orange-500/25 hover:brightness-110"
         >
           NUEVO +
         </button>
       </Header>
 
       <div className="flex">
-        <aside className="min-h-[calc(100vh-64px)] w-52 shrink-0 bg-neutral-900 px-4 py-6 text-white">
-          <h2 className="mb-4 text-xs font-bold uppercase tracking-wide text-gray-400">
+        <aside className="min-h-[calc(100vh-64px)] w-52 shrink-0 border-r border-white/10 bg-white/[0.03] px-4 py-6 text-white">
+          <h2 className="mb-4 text-xs font-bold uppercase tracking-wide text-white/40">
             Inventario
           </h2>
           <nav className="flex flex-col gap-1">
             <button
               onClick={() => setCategoriaActiva('Todos')}
-              className={`rounded-md px-2 py-1.5 text-left text-sm ${
-                categoriaActiva === 'Todos' ? 'font-bold text-white' : 'text-gray-300 hover:text-white'
+              className={`rounded-lg px-2 py-1.5 text-left text-sm transition ${
+                categoriaActiva === 'Todos' ? 'font-bold text-white' : 'text-white/50 hover:text-white'
               }`}
             >
               Todos
@@ -93,8 +93,8 @@ export default function Inventario() {
               <button
                 key={cat}
                 onClick={() => setCategoriaActiva(cat)}
-                className={`rounded-md px-2 py-1.5 text-left text-sm ${
-                  categoriaActiva === cat ? 'font-bold text-white' : 'text-gray-300 hover:text-white'
+                className={`rounded-lg px-2 py-1.5 text-left text-sm transition ${
+                  categoriaActiva === cat ? 'font-bold text-white' : 'text-white/50 hover:text-white'
                 }`}
               >
                 {cat}
@@ -104,8 +104,8 @@ export default function Inventario() {
         </aside>
 
         <div className="flex-1 overflow-x-auto p-6">
-          <table className="min-w-full rounded-lg bg-white text-sm shadow">
-            <thead className="bg-gray-100 text-left text-gray-600">
+          <table className="min-w-full rounded-xl border border-white/10 bg-neutral-900 text-sm text-white shadow-2xl shadow-black/30">
+            <thead className="bg-white/[0.06] text-left text-white/60">
               <tr>
                 <th className="px-4 py-3">ID</th>
                 <th className="px-4 py-3">Producto</th>
@@ -118,23 +118,23 @@ export default function Inventario() {
             </thead>
             <tbody>
               {filtrados.map((p, i) => (
-                <tr key={p.id} className="border-t transition hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400">{i + 1}</td>
-                  <td className="px-4 py-3 font-medium text-gray-800">{p.nombre}</td>
-                  <td className="px-4 py-3 text-gray-600">
+                <tr key={p.id} className="border-t border-white/10 transition hover:bg-white/5">
+                  <td className="px-4 py-3 text-white/40">{i + 1}</td>
+                  <td className="px-4 py-3 font-medium text-white">{p.nombre}</td>
+                  <td className="px-4 py-3 text-white/60">
                     {esGranel(p) ? 'Granel' : p.contenido || '—'}
                   </td>
                   <td
                     className={`px-4 py-3 font-semibold ${
-                      (p.stock ?? 0) <= (p.stockMinimo ?? 0) ? 'text-red-500' : 'text-gray-800'
+                      (p.stock ?? 0) <= (p.stockMinimo ?? 0) ? 'text-red-500' : 'text-white'
                     }`}
                   >
                     {formatStock(p)}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{p.caducidad || '—'}</td>
-                  <td className="px-4 py-3 text-gray-800">
+                  <td className="px-4 py-3 text-white/60">{p.caducidad || '—'}</td>
+                  <td className="px-4 py-3 text-white">
                     ${Number(p.precio || 0).toFixed(2)}
-                    {esGranel(p) && <span className="text-xs text-gray-400"> /100g</span>}
+                    {esGranel(p) && <span className="text-xs text-white/40"> /100g</span>}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
@@ -172,7 +172,7 @@ export default function Inventario() {
               ))}
               {filtrados.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-white/40">
                     No hay productos en esta categoría.
                   </td>
                 </tr>
@@ -201,16 +201,16 @@ export default function Inventario() {
 
 function ModalShell({ titulo, subtitulo, accionEtiqueta, onClose, children }) {
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl overflow-hidden rounded-lg bg-white">
-        <div className="flex items-center justify-between gap-4 bg-neutral-900 px-6 py-4 text-white">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-2xl overflow-hidden rounded-xl border border-white/10 bg-neutral-900 shadow-2xl shadow-black/50">
+        <div className="flex items-center justify-between gap-4 border-b border-white/10 bg-white/[0.03] px-6 py-4 text-white">
           <div>
             <h2 className="text-lg font-semibold">{titulo}</h2>
-            {subtitulo && <p className="text-xs text-gray-400">{subtitulo}</p>}
+            {subtitulo && <p className="text-xs text-white/40">{subtitulo}</p>}
           </div>
           <div className="flex shrink-0 items-center gap-3">
             {accionEtiqueta && <span className="text-xl">{accionEtiqueta}</span>}
-            <button onClick={onClose} className="text-sm text-gray-300 hover:text-white">
+            <button onClick={onClose} className="text-sm text-white/60 hover:text-white">
               Cerrar ×
             </button>
           </div>
@@ -222,7 +222,7 @@ function ModalShell({ titulo, subtitulo, accionEtiqueta, onClose, children }) {
 }
 
 const inputClass =
-  'w-full rounded-md bg-gray-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800'
+  'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-orange-400/60 focus:bg-white/10 focus:ring-2 focus:ring-orange-400/20'
 
 function NuevoProductoModal({ onClose }) {
   const [form, setForm] = useState({
@@ -301,12 +301,12 @@ function NuevoProductoModal({ onClose }) {
     <ModalShell titulo="Nuevo Producto" onClose={onClose}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Nombre del Dulce</label>
+          <label className="mb-1 block text-sm font-medium text-white/70">Nombre del Dulce</label>
           <input name="nombre" value={form.nombre} onChange={onChange} className={inputClass} />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-white/70">
             Código de Barras (leído en lector o escrito)
           </label>
           <input
@@ -318,7 +318,7 @@ function NuevoProductoModal({ onClose }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Categoría</label>
+          <label className="mb-1 block text-sm font-medium text-white/70">Categoría</label>
           <select name="categoria" value={form.categoria} onChange={onChange} className={inputClass}>
             {CATEGORIAS.map((c) => (
               <option key={c} value={c}>
@@ -329,7 +329,7 @@ function NuevoProductoModal({ onClose }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-white/70">
             {granel ? 'Stock inicial (gramos)' : 'Cantidad Comprada'}
           </label>
           <input
@@ -344,7 +344,7 @@ function NuevoProductoModal({ onClose }) {
         {!granel && (
           <>
             <div>
-              <p className="mb-1 text-sm font-medium text-gray-700">¿Cómo llega la mercancía?</p>
+              <p className="mb-1 text-sm font-medium text-white/70">¿Cómo llega la mercancía?</p>
               <div className="flex gap-2">
                 {['caja', 'individual'].map((op) => (
                   <button
@@ -353,8 +353,8 @@ function NuevoProductoModal({ onClose }) {
                     onClick={() => setForm({ ...form, presentacion: op })}
                     className={`flex-1 rounded-md px-3 py-2 text-sm capitalize ${
                       form.presentacion === op
-                        ? 'bg-neutral-900 text-white'
-                        : 'bg-gray-100 text-gray-600'
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25'
+                        : 'bg-white/10 text-white/60'
                     }`}
                   >
                     {op}
@@ -364,7 +364,7 @@ function NuevoProductoModal({ onClose }) {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Num. Paquete/Piezas</label>
+              <label className="mb-1 block text-sm font-medium text-white/70">Num. Paquete/Piezas</label>
               <input
                 type="number"
                 name="numPaquetePiezas"
@@ -375,7 +375,7 @@ function NuevoProductoModal({ onClose }) {
             </div>
 
             <div>
-              <p className="mb-1 text-sm font-medium text-gray-700">Paquete o Piezas</p>
+              <p className="mb-1 text-sm font-medium text-white/70">Paquete o Piezas</p>
               <div className="flex gap-2">
                 {['paquete', 'piezas'].map((op) => (
                   <button
@@ -383,7 +383,7 @@ function NuevoProductoModal({ onClose }) {
                     type="button"
                     onClick={() => setForm({ ...form, empaque: op })}
                     className={`flex-1 rounded-md px-3 py-2 text-sm capitalize ${
-                      form.empaque === op ? 'bg-neutral-900 text-white' : 'bg-gray-100 text-gray-600'
+                      form.empaque === op ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25' : 'bg-white/10 text-white/60'
                     }`}
                   >
                     {op}
@@ -393,7 +393,7 @@ function NuevoProductoModal({ onClose }) {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Contenido</label>
+              <label className="mb-1 block text-sm font-medium text-white/70">Contenido</label>
               <input
                 name="contenido"
                 value={form.contenido}
@@ -406,7 +406,7 @@ function NuevoProductoModal({ onClose }) {
         )}
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-white/70">
             {granel ? 'Precio de Venta (por 100g)' : 'Precio de Venta'}
           </label>
           <input
@@ -420,7 +420,7 @@ function NuevoProductoModal({ onClose }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-white/70">
             Stock Mínimo {granel && '(gramos)'}
           </label>
           <input
@@ -433,7 +433,7 @@ function NuevoProductoModal({ onClose }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Fecha de Compra</label>
+          <label className="mb-1 block text-sm font-medium text-white/70">Fecha de Compra</label>
           <input
             type="date"
             name="fechaCompra"
@@ -444,7 +444,7 @@ function NuevoProductoModal({ onClose }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Caducidad</label>
+          <label className="mb-1 block text-sm font-medium text-white/70">Caducidad</label>
           <input
             type="date"
             name="caducidad"
@@ -456,20 +456,20 @@ function NuevoProductoModal({ onClose }) {
       </div>
 
       {error && (
-        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="mt-4 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</p>
       )}
 
       <div className="mt-6 flex justify-end gap-3">
         <button
           onClick={onClose}
-          className="rounded-md bg-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+          className="rounded-lg bg-white/10 px-5 py-2 text-sm font-semibold text-white hover:bg-white/20"
         >
           Cerrar
         </button>
         <button
           onClick={handleGuardar}
           disabled={guardando}
-          className="rounded-md bg-purple-700 px-5 py-2 text-sm font-semibold text-white hover:bg-purple-800 disabled:opacity-50"
+          className="rounded-lg bg-purple-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 hover:bg-purple-500 disabled:opacity-50"
         >
           {guardando ? 'Guardando...' : 'Guardar'}
         </button>
@@ -527,7 +527,7 @@ function AgregarModal({ producto, onClose }) {
     >
       <div className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-white/70">
             Cantidad Recibida (
             {granel ? 'gramos' : producto.presentacion === 'caja' ? 'cajas' : 'individual'})
           </label>
@@ -540,7 +540,7 @@ function AgregarModal({ producto, onClose }) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Egreso Total</label>
+          <label className="mb-1 block text-sm font-medium text-white/70">Egreso Total</label>
           <input
             type="number"
             step="0.01"
@@ -551,7 +551,7 @@ function AgregarModal({ producto, onClose }) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Fecha de compra</label>
+          <label className="mb-1 block text-sm font-medium text-white/70">Fecha de compra</label>
           <input
             type="date"
             value={fechaCompra}
@@ -560,7 +560,7 @@ function AgregarModal({ producto, onClose }) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Fecha de Caducidad</label>
+          <label className="mb-1 block text-sm font-medium text-white/70">Fecha de Caducidad</label>
           <input
             type="date"
             value={caducidad}
@@ -568,27 +568,27 @@ function AgregarModal({ producto, onClose }) {
             className={inputClass}
           />
         </div>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-white/40">
           Este lote (cantidad, fecha de compra y caducidad) queda guardado en el historial visible
           desde el botón "caducidad" de este producto.
         </p>
       </div>
 
       {error && (
-        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="mt-4 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</p>
       )}
 
       <div className="mt-6 flex justify-end gap-3">
         <button
           onClick={onClose}
-          className="rounded-md bg-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+          className="rounded-lg bg-white/10 px-5 py-2 text-sm font-semibold text-white hover:bg-white/20"
         >
           Cerrar
         </button>
         <button
           onClick={handleGuardar}
           disabled={guardando}
-          className="rounded-md bg-purple-700 px-5 py-2 text-sm font-semibold text-white hover:bg-purple-800 disabled:opacity-50"
+          className="rounded-lg bg-purple-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 hover:bg-purple-500 disabled:opacity-50"
         >
           {guardando ? 'Guardando...' : 'Guardar'}
         </button>
@@ -636,11 +636,11 @@ function EditarModal({ producto, onClose }) {
     >
       <div className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Nombre del Dulce</label>
+          <label className="mb-1 block text-sm font-medium text-white/70">Nombre del Dulce</label>
           <input value={nombre} onChange={(e) => setNombre(e.target.value)} className={inputClass} />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-white/70">
             Precio de Venta {esGranel(producto) && '(por 100g)'}
           </label>
           <input
@@ -652,7 +652,7 @@ function EditarModal({ producto, onClose }) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Código de barras</label>
+          <label className="mb-1 block text-sm font-medium text-white/70">Código de barras</label>
           <input
             value={codigoBarras}
             onChange={(e) => setCodigoBarras(e.target.value)}
@@ -660,7 +660,7 @@ function EditarModal({ producto, onClose }) {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-white/70">
             Stock Mínimo Alerta {esGranel(producto) && '(gramos)'}
           </label>
           <input
@@ -673,20 +673,20 @@ function EditarModal({ producto, onClose }) {
       </div>
 
       {error && (
-        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="mt-4 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</p>
       )}
 
       <div className="mt-6 flex justify-end gap-3">
         <button
           onClick={onClose}
-          className="rounded-md bg-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+          className="rounded-lg bg-white/10 px-5 py-2 text-sm font-semibold text-white hover:bg-white/20"
         >
           Cerrar
         </button>
         <button
           onClick={handleGuardar}
           disabled={guardando}
-          className="rounded-md bg-purple-700 px-5 py-2 text-sm font-semibold text-white hover:bg-purple-800 disabled:opacity-50"
+          className="rounded-lg bg-purple-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 hover:bg-purple-500 disabled:opacity-50"
         >
           {guardando ? 'Guardando...' : 'Guardar'}
         </button>
@@ -708,9 +708,9 @@ function DetallesCaducidadModal({ producto, onClose }) {
     <ModalShell titulo={producto.nombre} accionEtiqueta="Caducidad" onClose={onClose}>
       <div className="space-y-4 text-sm">
         <p>
-          <span className="font-medium text-gray-700">Caducidad más próxima: </span>
+          <span className="font-medium text-white/70">Caducidad más próxima: </span>
           {producto.caducidad ? (
-            <span className={producto.caducidad < hoy ? 'font-semibold text-red-600' : ''}>
+            <span className={producto.caducidad < hoy ? 'font-semibold text-red-400' : ''}>
               {producto.caducidad}
             </span>
           ) : (
@@ -719,16 +719,16 @@ function DetallesCaducidadModal({ producto, onClose }) {
         </p>
 
         <div>
-          <p className="mb-2 font-medium text-gray-700">Historial de compras / lotes</p>
+          <p className="mb-2 font-medium text-white/70">Historial de compras / lotes</p>
           {lotes.length === 0 ? (
-            <p className="text-gray-400">
+            <p className="text-white/40">
               Aún no hay lotes registrados. Se agregan automáticamente cada vez que uses el botón
               "agregar" para registrar una compra.
             </p>
           ) : (
-            <div className="overflow-hidden rounded-md border">
+            <div className="overflow-hidden rounded-lg border border-white/10">
               <table className="min-w-full text-xs">
-                <thead className="bg-gray-100 text-left text-gray-500">
+                <thead className="bg-white/[0.06] text-left text-white/50">
                   <tr>
                     <th className="px-3 py-2">Cantidad</th>
                     <th className="px-3 py-2">Fecha de compra</th>
@@ -744,16 +744,16 @@ function DetallesCaducidadModal({ producto, onClose }) {
                       lote.caducidad &&
                       (new Date(lote.caducidad) - new Date(hoy)) / 86400000 <= 7
                     return (
-                      <tr key={idx} className="border-t">
+                      <tr key={idx} className="border-t border-white/10">
                         <td className="px-3 py-2">
                           {lote.cantidad} {granel ? 'g' : 'pzas'}
                         </td>
                         <td className="px-3 py-2">{lote.fechaCompra || '—'}</td>
                         <td className="px-3 py-2">{lote.caducidad || '—'}</td>
                         <td className="px-3 py-2">
-                          {vencido && <span className="font-semibold text-red-600">Vencido</span>}
-                          {porVencer && <span className="font-semibold text-amber-600">Por vencer</span>}
-                          {!vencido && !porVencer && <span className="text-gray-400">OK</span>}
+                          {vencido && <span className="font-semibold text-red-400">Vencido</span>}
+                          {porVencer && <span className="font-semibold text-amber-400">Por vencer</span>}
+                          {!vencido && !porVencer && <span className="text-white/40">OK</span>}
                         </td>
                       </tr>
                     )
@@ -768,7 +768,7 @@ function DetallesCaducidadModal({ producto, onClose }) {
       <div className="mt-6 flex justify-end">
         <button
           onClick={onClose}
-          className="rounded-md bg-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+          className="rounded-lg bg-white/10 px-5 py-2 text-sm font-semibold text-white hover:bg-white/20"
         >
           Cerrar
         </button>
